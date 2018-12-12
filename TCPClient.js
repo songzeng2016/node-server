@@ -8,7 +8,8 @@ var client = net.connect(PORT, HOST, function() {
   console.log('Connected to the server.');
   // client.write('Hello Server!');
   let data = JSON.stringify([1, 2, 3]);
-  client.write(data);
+  let message = 'ffd8sdfsafasffd9';
+  client.write(message);
 });
 
 //监听数据传输事件

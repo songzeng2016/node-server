@@ -9,11 +9,35 @@ var server = net.createServer();
 server.on('connection', function(socket) {
   var client = socket.remoteAddress + ':' + socket.remotePort;
   console.info('Connected to ' + client);
+  let imgData = '';
+  let time = 0;
+  let timer = null;
+  let success = false;
 
   //监听数据接收事件
   socket.on('data', function(data) {
     console.log('data: ++ ' + data);
-    socket.write('Hello Client!');
+    if (/^ffd8/.test(data)) {
+      imgData = '';
+      time = 0;
+      success = false;
+      timer = setInterval(() => {
+        time++;
+      }, 1000);
+      setTimeout(() => {
+        if (!success) {
+          console.log('error:', imgData);
+          socket.write('no');
+        }
+      }, 5000);
+    }
+    imgData += data;
+    if (/ffd9$/.test(data)) {
+      console.log('success:', imgData);
+      success = true;
+      socket.write('yes');
+    }
+    // socket.write(data);
   });
 
   //监听连接断开事件
