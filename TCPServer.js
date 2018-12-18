@@ -26,6 +26,7 @@ server.on('connection', function(socket) {
       }, 1000);
       setTimeout(() => {
         if (!success) {
+          clearInterval(timer);
           console.log('error:', imgData);
           socket.write('no');
         }
@@ -33,6 +34,7 @@ server.on('connection', function(socket) {
     }
     imgData += data;
     if (/ffd9$/.test(data)) {
+      timer && clearInterval(timer);
       console.log('success:', imgData);
       success = true;
       socket.write('yes');
@@ -42,6 +44,7 @@ server.on('connection', function(socket) {
 
   //监听连接断开事件
   socket.on('end', function() {
+    timer && clearInterval(timer);
     console.log('Client disconnected.');
   });
 });
