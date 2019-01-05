@@ -14,6 +14,8 @@ server.on('connection', function(socket) {
   let timer = null;
   let success = false;
 
+  socket.setEncoding('utf-8');
+
   //监听数据接收事件
   socket.on('data', function(data) {
     console.log('data: ++ ' + data);

@@ -1,5 +1,5 @@
 const net = require('net');
-const {saveImage} = require('./fs');
+const {saveImage, saveTxt} = require('./fs');
 
 const server = net.createServer();
 // const PORT = 3000;  // 定义端口
@@ -19,7 +19,7 @@ server.on('connection', function (socket) {
 
     // 判断开始接收数据
     if (/^ffd8/.test(data)) {
-      imgData = '';
+      imgData = data;
       isComplete = false;
 
       setTimeout(() => {  // 设置超时时间
@@ -38,6 +38,10 @@ server.on('connection', function (socket) {
         } else {
           socket.write('no');
         }
+      });
+
+      saveTxt(imgData, function (success) {
+
       });
     }
   });
