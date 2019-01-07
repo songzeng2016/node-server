@@ -1,5 +1,6 @@
 const express = require('express');
 const net = require('net');
+const db = require('./model/db');
 const {saveImage} = require('./fs');
 
 const app = express();
@@ -67,13 +68,53 @@ app.get('/getImage', function (request, response) {
   response.send('get请求成功');
 });
 
-app.get('/set', function (req, res) {
-  console.log(req.query);
+app.get('/getInfo', function (req, res) {
+  // console.log(req.query);
   // console.log(response);
 
-  res.send({
-    code: 200,
-    data: {},
+  const {type} = req.query;
+  const data = {
+    name: type,
+  };
+
+  db.__findOne(data, function (err, result) {
+    if (!err) {
+      console.log(result);
+      res.send({
+        code: 200,
+        data: result,
+      });
+    } else {
+      // console.log(err);
+      res.send({
+        code: 500,
+        data: {},
+      });
+    }
+  });
+});
+
+app.get('/setInfo', function (req, res) {
+  console.log(req.query);
+  // console.log(response);
+  const {type, value} = req.query;
+  const data = {
+    name: type,
+    value,
+  };
+
+  db.__insertOne(data, function (err, result) {
+    if (!err) {
+      res.send({
+        code: 200,
+        data: {},
+      });
+    } else {
+      res.send({
+        code: 500,
+        data: {},
+      });
+    }
   });
 });
 
