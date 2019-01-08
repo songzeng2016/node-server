@@ -9,16 +9,6 @@ const config = require('../config/config.js');
 const {dburl, collectionName} = config;
 
 /**
- * 连接数据库
- */
-
-function __connectDB(callback) {
-  MongodbClient.connect(dburl, function (err, db) {
-    callback(err, db, db.db('monitor'));
-  });
-}
-
-/**
  * 插入一条数据
  * @param {*} collectionName 集合名
  * @param {*} Datajson 写入的json数据
@@ -34,26 +24,37 @@ function __insertOne(Datajson, callback) {
   })
 }
 
-/**
- * 查找数据
- * @param {*} collectionName 集合名
- * @param {*} Datajson 查询条件
- * @param {*} callback 回调函数
- */
-
-function __findOne(JsonObj, callback) {
-  __connectDB(function (err, db, dbo) {
-    // console.log(db);
-    var result = dbo.collection(collectionName).findOne(JsonObj);
-    console.log(result);
-    callback(err, result);
-    db.close();
+async function connectDB() {
+  const db = await MongodbClient.connect(dburl, {
+    useNewUrlParser: true,
   });
+  const dbo = db.db('monitor');
+
+  return {
+    db,
+    dbo,
+    collection: dbo.collection(collectionName),
+  };
+}
+
+async function findOne(json) {
+  const {db, collection} = await connectDB();
+  const result = await collection.findOne(json);
+
+  db.close();
+  return result;
+}
+
+async function updateOne(json, data) {
+  const {db, collection} = await connectDB();
+  const result = await collection.updateOne(json, {$set: data});
+
+  db.close();
+  return result;
 }
 
 module.exports = {
-  __connectDB,
-  __insertOne,
-  __findOne,
+  findOne,
+  updateOne,
 };
 // db.js 文件是数据库操作的DAO 层的封装

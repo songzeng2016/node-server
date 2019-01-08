@@ -63,73 +63,71 @@ socket.on('connection', function (socket) {
 // 设置静态资源路径
 app.use(express.static('../static'));
 
-app.get('/getImage', function (request, response) {
-  // console.log(request)
-  response.send('get请求成功');
-});
+app.get('/uploadImage', function (req, res) {
+  const json = {name: 'image'};
+  db.findOne(json).then(result => {
+    const list = result.value;
+    list.push(Date.now() + '.png');
+    const data = {
+      ...json,
+      value: list,
+    };
 
-app.get('/getInfo', function (req, res) {
-  // console.log(req.query);
-  // console.log(response);
-
-  const {type} = req.query;
-  const data = {
-    name: type,
-  };
-
-  db.__findOne(data, function (err, result) {
-    if (!err) {
-      console.log(result);
+    db.updateOne(json, data).then(result => {
       res.send({
         code: 200,
         data: result,
       });
-    } else {
-      // console.log(err);
-      res.send({
-        code: 500,
-        data: {},
-      });
-    }
+    });
   });
 });
 
+app.get('/getImage', function (req, res) {
+  const json = {name: 'image'};
+  db.findOne(json).then(result => {
+    res.send({
+      code: 200,
+      data: result,
+    });
+  });
+});
+
+// 获取信息
+app.get('/getInfo', function (req, res) {
+  const {type} = req.query;
+  const json = {name: type};
+
+  db.findOne(json).then(result => {
+    res.send({
+      code: 200,
+      data: result,
+    });
+  });
+});
+
+// 设置信息
 app.get('/setInfo', function (req, res) {
-  console.log(req.query);
-  // console.log(response);
   const {type, value} = req.query;
+  const json = {name: type};
   const data = {
-    name: type,
+    ...json,
     value,
   };
 
-  db.__insertOne(data, function (err, result) {
-    if (!err) {
-      res.send({
-        code: 200,
-        data: {},
-      });
-    } else {
-      res.send({
-        code: 500,
-        data: {},
-      });
-    }
+  db.updateOne(json, data).then(result => {
+    res.send({
+      code: 200,
+      data: result,
+    });
   });
 });
 
-app.get('/setPhone', function (request, response) {
-  sockets.forEach(socket => {
-    socket.write('$phone');
-  });
-  response.send('get请求成功');
-});
-
+// express 服务器开始监听特定端口
 app.listen(express_port, function () {
   console.log('express listen on port: ' + express_port);
 });
 
-// TCP服务器开始监听特定端口
+// socket 服务器开始监听特定端口
 socket.listen(socket_port, function () {
   console.log('socket listen on port: ' + socket_port);
 });
