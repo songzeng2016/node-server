@@ -12,6 +12,22 @@ const time_out = 5000;  // 定义超时时间
 
 const sockets = [];  // 存储所有客户端 socket
 
+
+// 更新图片列表
+async function updateImage(imageName) {
+  const json = {name: 'image'};
+
+  const result = await db.findOne(json);
+  const list = result.value;
+  list.push(imageName);
+  const data = {
+    ...json,
+    value: list,
+  };
+
+  return db.updateOne(json, data);
+}
+
 //监听连接事件
 socket.on('connection', function (socket) {
   const client = socket.remoteAddress + ':' + socket.remotePort;
@@ -41,9 +57,11 @@ socket.on('connection', function (socket) {
     imgData += data;
     if (/ffd9$/.test(data)) {
       isComplete = true;
-      saveImage(imgData, function (success) {
-        if (success) {
-          socket.write('yes');
+      saveImage(imgData, function (imageName) {
+        if (imageName) {
+          updateImage(imageName).then(() => {
+            socket.write('yes');
+          });
         } else {
           socket.write('no');
         }
@@ -82,6 +100,7 @@ app.get('/uploadImage', function (req, res) {
   });
 });
 
+// 获取图片里列表
 app.get('/getImage', function (req, res) {
   const json = {name: 'image'};
   db.findOne(json).then(result => {
@@ -115,6 +134,10 @@ app.get('/setInfo', function (req, res) {
   };
 
   db.updateOne(json, data).then(result => {
+    // 发送消息给客户端
+    sockets.forEach(socket => {
+      socket.write(type + value);
+    });
     res.send({
       code: 200,
       data: result,

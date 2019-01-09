@@ -8,7 +8,7 @@ var client = net.connect(PORT, HOST, function() {
   console.log('Connected to the server.');
   // client.write('Hello Server!');
   let data = JSON.stringify([1, 2, 3]);
-  let message = '�����';
+  let message = 'ffd8asdfsafdsaffd9';
   client.write(message);
 });
 
