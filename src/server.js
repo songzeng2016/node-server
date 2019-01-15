@@ -1,14 +1,14 @@
 const express = require('express');
 const net = require('net');
 const db = require('./model/db');
-const {saveImage} = require('./fs');
+const {saveImage, saveTxt} = require('./fs');
 
 const app = express();
 const socket = net.createServer();
 
 const express_port = 8080;  // 定义端口
 const socket_port = 3000;
-const time_out = 5000;  // 定义超时时间
+const time_out = 15000;  // 定义超时时间
 
 const sockets = [];  // 存储所有客户端 socket
 
@@ -43,28 +43,34 @@ socket.on('connection', function (socket) {
     console.log('data: ++ ' + data);
 
     // 判断开始接收数据
-    if (/^ffd8/.test(data)) {
-      imgData = data;
+    if (/^(ffd8|FFD8)/.test(data)) {
+      imgData = '';
       isComplete = false;
 
       setTimeout(() => {  // 设置超时时间
         if (!isComplete) {
+          console.log('no');
           socket.write('no');
         }
       }, time_out);
     }
 
     imgData += data;
-    if (/ffd9$/.test(data)) {
+    if (/(ffd9|FFD9)/.test(data)) {
       isComplete = true;
       saveImage(imgData, function (imageName) {
         if (imageName) {
           updateImage(imageName).then(() => {
+            console.log('yes');
             socket.write('yes');
           });
         } else {
+          console.log('no');
           socket.write('no');
         }
+      });
+      saveTxt(imgData, function (success) {
+
       });
     }
   });
@@ -136,6 +142,7 @@ app.get('/setInfo', function (req, res) {
   db.updateOne(json, data).then(result => {
     // 发送消息给客户端
     sockets.forEach(socket => {
+      console.log(type + value);
       socket.write(type + value);
     });
     res.send({

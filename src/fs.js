@@ -9,13 +9,16 @@ module.exports.saveImage = function (data, callback) {
       callback(0);
     } else {
       // res.send('保存成功！');
+      console.log(name);
       callback(name);
     }
   });
 };
 
 module.exports.saveTxt = function (data, callback) {
-  fs.writeFile('../static/images/txt.txt', data, function (err) {
+  const name = Date.now() + '.txt';
+  fs.writeFile('../static/images/' + name, data, function (err) {
+    callback();
     if (err) {
       // res.send(err);
       // callback(0);
