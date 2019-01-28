@@ -140,10 +140,13 @@ app.get('/setInfo', function (req, res) {
   };
 
   db.updateOne(json, data).then(result => {
+    let prefix = '';
+    prefix = type === 'phone' ? '$' :
+        type === 'name' ? '.' : ',';
     // 发送消息给客户端
     sockets.forEach(socket => {
-      console.log(type + value);
-      socket.write(type + value);
+      console.log(prefix + value);
+      socket.write(prefix + value);
     });
     res.send({
       code: 200,
