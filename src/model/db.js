@@ -41,6 +41,9 @@ async function findOne(json) {
   const {db, collection} = await connectDB();
   const result = await collection.findOne(json);
 
+  // console.log(json);
+  // console.log(result);
+
   db.close();
   return result;
 }
