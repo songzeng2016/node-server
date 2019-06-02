@@ -30,6 +30,34 @@ async function updateImage(imageName) {
   return db.updateOne(json, data);
 }
 
+// 更新温度列表
+async function updateTemp(tempData) {
+  const json = {name: 'temp'};
+  const result = await db.findOne(json);
+  const list = result.value;
+  list.push(tempData);
+  const data = {
+    ...json,
+    value: list,
+  };
+
+  return db.updateOne(json, data);
+}
+
+// 更新一氧化碳浓度列表
+async function updateCo(coData) {
+  const json = {name: 'co'};
+  const result = await db.findOne(json);
+  const list = result.value;
+  list.push(coData);
+  const data = {
+    ...json,
+    value: list,
+  };
+
+  return db.updateOne(json, data);
+}
+
 //监听连接事件
 socket.on('connection', function (socket) {
   const client = socket.remoteAddress + ':' + socket.remotePort;
@@ -49,6 +77,23 @@ socket.on('connection', function (socket) {
     if (data == 'fefe') {
       console.log('heart');
       socket.write(data);
+    }
+
+    // 温度
+    if (/^#/.test(data)) {
+      console.log('temp: ' + data);
+      updateTemp({
+        time: Date.now(),
+        value: String(data).replace('#', ''),
+      });
+    }
+    // 一氧化碳浓度
+    if (/^@/.test(data)) {
+      console.log('co: ' + data);
+      updateCo({
+        time: Date.now(),
+        value: String(data).replace('@', ''),
+      });
     }
 
     // 判断开始接收数据
