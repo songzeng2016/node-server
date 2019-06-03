@@ -188,6 +188,44 @@ app.get('/getInfo', function (req, res) {
   });
 });
 
+app.get('/reset', async function (req, res) {
+  const {type} = req.query;
+  // 清空图片
+  if (type === 'image') {
+    const json = {name: 'image'};
+    const data = {
+      ...json,
+      value: [],
+    };
+
+    db.updateOne(json, data).then(result => {
+      res.send({
+        code: 200,
+        data: result,
+      });
+    });
+  } else {
+    //  清空信息
+    const json1 = {name: 'temp'};
+    const json2 = {name: 'co'};
+    const data1 = {
+      ...json1,
+      value: [],
+    };
+    const data2 = {
+      ...json2,
+      value: [],
+    };
+
+    await db.updateOne(json1, data1);
+    await db.updateOne(json2, data2);
+    res.send({
+      code: 200,
+      data: {},
+    });
+  }
+});
+
 // 设置信息
 app.get('/setInfo', function (req, res) {
   let {type, value} = req.query;
